@@ -1,0 +1,74 @@
+<!-- index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TikTok Clone</title>
+  <!-- Include Tailwind CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body>
+  <div class="container mx-auto p-4">
+    <h1 class="text-2xl font-bold mb-4">Upload Video</h1>
+    <form id="uploadForm" enctype="multipart/form-data">
+      <input type="file" name="video" accept="video/*" class="mb-2">
+      <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Upload</button>
+    </form>
+    <div id="videoFeed" class="mt-8">
+      <!-- Video feed will be displayed here -->
+    </div>
+  </div>
+
+  <!-- Include jQuery -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      $('#uploadForm').submit(function(e) {
+        e.preventDefault();
+        var formData = new FormData(this);
+        $.ajax({
+          url: '/upload',
+          type: 'POST',
+          data: formData,
+          contentType: false,
+          processData: false,
+          beforeSend: function(xhr) {
+            xhr.setRequestHeader('Authorization', 'Bearer 1'); // Assuming user ID 1
+          },
+          success: function(response) {
+            console.log(response);
+            alert('Video uploaded successfully');
+            fetchVideoFeed(); // Refresh video feed after upload
+          },
+          error: function(xhr, status, error) {
+            console.error(error);
+            alert('Error uploading video');
+          }
+        });
+      });
+
+      // Function to fetch and display video feed
+      function fetchVideoFeed() {
+        $.get('/videos', function(videos) {
+          $('#videoFeed').empty();
+          videos.forEach(function(video) {
+            $('#videoFeed').append(`
+              <div class="mb-4">
+                <video width="320" height="240" controls>
+                  <source src="${video}" type="video/mp4">
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+            `);
+          });
+        });
+      }
+
+      // Fetch video feed on page load
+      fetchVideoFeed();
+    });
+  </script>
+</body>
+</html>
